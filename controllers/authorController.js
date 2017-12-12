@@ -32,12 +32,45 @@ exports.author_detail = function(req, res, next) {
 };
 
 //Display Author create form on GET
-exports.author_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Author create GET');    
+exports.author_create_get = function(req, res, next) {
+    res.render('author_form', { title: 'Create Author'});
 };
 
-exports.author_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Author create POST');
+exports.author_create_post = function(req, res, next) {
+    req.checkBody('first_name', 'First name must be specified.').notEmpty();
+    req.checkBody('family_name', 'Family name must be specified.').notEmpty();
+    req.checkBody('family_name', 'Family name must be alphanumeric text.').isAlphanumeric();
+    req.checkBody('date_of_birth', 'Invalid date').optional({ checkFalsy: true }).isISO8601();
+    req.checkBody('date_of_death', 'Invalid date').optional({ checkFalsy: true }).isISO8601();
+
+    req.sanitize('first_name').escape();
+    req.sanitize('family_name').escape();
+    req.sanitize('first_name').trim();
+    req.sanitize('family_name').trim();
+
+    var errors = req.validationErrors();
+    req.sanitize('date_of_birth').toDate();
+    req.sanitize('date_of_death').toDate();
+
+    var author = new Author(
+        {
+            first_name: req.body.first_name,
+            family_name: req.body.family_name,
+            date_of_birth: req.body.date_of_birth,
+            date_of_death: req.body.date_of_death
+        }
+    );
+
+    if (errors) {
+        res.render('author_form', { title: 'Create Author', author: author, errors: errors});
+        return;
+    }
+    else {
+        author.save(function (err) {
+            if (err) { return next(err);}
+            res.redirect(author.url);
+        });
+    }
 };
 
 exports.author_delete_get = function(req, res) {
