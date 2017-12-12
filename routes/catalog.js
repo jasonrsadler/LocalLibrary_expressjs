@@ -30,7 +30,7 @@ router
 .post('/author/create', author_controller.author_create_post);
 
 router
-.get('author/:id/delete', author_controller.author_delete_get)
+.get('/author/:id/delete', author_controller.author_delete_get)
 .post('/author/:id/delete', author_controller.author_delete_post);
 
 router
@@ -46,12 +46,12 @@ router
 .post('/genre/create', genre_controller.genre_create_post);
 
 router
-.get('genre/:id/delete', genre_controller.genre_delete_get)
-.post('genre/:id/delete', genre_controller.genre_delete_post);
+.get('/genre/:id/delete', genre_controller.genre_delete_get)
+.post('/genre/:id/delete', genre_controller.genre_delete_post);
 
 router
-.get('genre/:id/update', genre_controller.genre_update_get)
-.post('genre/:id/update', genre_controller.genre_update_post);
+.get('/genre/:id/update', genre_controller.genre_update_get)
+.post('/genre/:id/update', genre_controller.genre_update_post);
 
 router.get('/genre/:id', genre_controller.genre_detail);
 router.get('/genres', genre_controller.genre_list);
