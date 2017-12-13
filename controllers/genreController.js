@@ -65,12 +65,43 @@ exports.genre_create_post = function(req, res, next) {
     }
 };
 
-exports.genre_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Genre delete GET');
+exports.genre_delete_get = function(req, res, next) {
+    async.parallel({
+        genres: function(callback) {
+            Genre.findById(req.params.id).exec(callback);
+        },
+        genre_books: function(callback) {
+            Book.find({'genre': req.params.id}).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) {return next(err);}
+        res.render('genre_delete', {title: 'Delete Genre', genre: results.genres, genre_books: results.genre_books});
+    });    
 };
 
-exports.genre_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Genre delete POST');
+exports.genre_delete_post = function(req, res, next) {
+    req.checkBody('genreid', 'Genre id must exist').notEmpty();
+
+    async.parallel({
+        genre: function(callback) {
+            Genre.findById(req.params.genreid).exec(callback);
+        },
+        genre_books: function(callback) {
+            Book.find({'genre': req.params.genreid}).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.genre_books.length > 0) {
+            res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, genre_books: results.genre_books});
+            return;
+        }
+        else {
+            Genre.findByIdAndRemove(req.body.genreid, function deleteGenre(err) {
+                if (err) { return next(err); }
+                res.redirect('/catalog/genres');
+            });
+        }
+    });
 };
 
 exports.genre_update_get = function(req, res) {
