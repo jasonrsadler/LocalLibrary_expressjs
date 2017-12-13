@@ -16,7 +16,7 @@ var app = express();
 app.use(helmet());
 
 var mongoose = require('mongoose');
-var mongoDB = 'mongodb://localhost:27017/testdb';
+var mongoDB = process.env.MONGODB_URI || 'mongodb://localhost:27017/testdb';
 mongoose.connect(mongoDB, {
   useMongoClient: true
 });
