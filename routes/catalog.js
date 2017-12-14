@@ -34,8 +34,8 @@ router
 .post('/author/:id/delete', author_controller.author_delete_post);
 
 router
-.get('author/:id/update', author_controller.author_update_get)
-.post('author/:id/update', author_controller.author_update_post);
+.get('/author/:id/update', author_controller.author_update_get)
+.post('/author/:id/update', author_controller.author_update_post);
 
 router.get('/author/:id', author_controller.author_detail);
 router.get('/authors', author_controller.author_list);

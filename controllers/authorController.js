@@ -113,10 +113,59 @@ exports.author_delete_post = function(req, res, next) {
     });
 };
 
-exports.author_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Author update GET');
+exports.author_update_get = function(req, res, next) {
+    req.sanitize('id').escape();
+    req.sanitize('id').trim();
+    async.parallel({
+        author: function(callback) {
+            Author.findById(req.params.id).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        res.render('author_form', {title: 'Update Author', author: results.author});
+    });
 };
 
-exports.author_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Author update  POST');
+exports.author_update_post = function(req, res, next) {
+    req.sanitize('id').escape();
+    req.sanitize('id').trim();
+    
+    req.checkBody('first_name', 'First name must not be empty').notEmpty();
+    req.checkBody('family_name', 'Family name must not be empty').notEmpty();
+    
+    req.sanitize('first_name').escape();
+    req.sanitize('first_name').trim();
+    req.sanitize('family_name').escape();
+    req.sanitize('family_name').trim();
+    req.checkBody('date_of_birth', 'Invalid Date').optional({ checkFalsy: true}).isISO8601();
+    req.checkBody('date_of_death', 'Invalid Date').optional({ checkFalsy: true}).isISO8601();
+    
+    
+    var author = new Author({
+        first_name: req.body.first_name,
+        family_name: req.body.family_name,
+        date_of_birth: req.body.date_of_birth,
+        date_of_death: req.body.date_of_death,
+        _id:req.params.id
+    });
+    
+    var errors = req.validationErrors();
+    req.sanitize('date_of_birth').toDate();
+    req.sanitize('date_of_death').toDate();
+    
+    if (errors) { 
+        async.parallel({
+            authors: function(callback) {
+                Author.find(callback);
+            }, 
+        }, function(err, results) {
+            res.render('author_form', {title: 'Update Author', author: author, errors:errors});
+        });        
+    }    
+    else {
+        Author.findByIdAndUpdate(req.params.id, author, {}, function(err, theauthor) {
+            if (err) { return next(err); }
+            res.redirect(theauthor.url);        
+        });
+    }
 };
